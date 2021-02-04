@@ -256,5 +256,29 @@ def create_people():
         return redirect(url_for('index'))
     return render_template('create_people.html')
 
+@app.route('/update/<int:id>',methods=['GET','POST'])
+def update(id):
+    if request.method=="POST":
+        id = request.form['id']
+        people = People.query.get_or_404(id)
+        people.name = request.form['name']
+        people.state = request.form['state']
+        people.salary = request.form['salary']
+        people.grade = request.form['grade']
+        people.room = request.form['room']
+        people.telnum = request.form['telnum']
+        people.picture = request.form['picture']
+        people.keywords = request.form['keywords']
+        try:
+            db.session.commit()
+            flash('Successfully updated the record','success')
+            return redirect(url_for('index'))
+        except:
+            flash('Problem in updating the record','danger')
+            return redirect(url_for('index'))
+    people_to_update = People.query.get_or_404(id)
+    return render_template('update_people.html',people=people_to_update,id=id)
+    
+
 if __name__=="__main__":
     app.run(debug=True)
