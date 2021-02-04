@@ -1,0 +1,12 @@
+{%extends 'base.html'%}
+{%block title%} Home {%endblock title%}
+
+
+{%block body%}
+
+<div class="container">
+    {% for category, message in get_flashed_messages(with_categories=True) %}
+    <div class="alert alert-{{category}}">{{ message }}</div>
+    {% endfor %}
+</div>
+{%endblock body%}

@@ -65,7 +65,7 @@ HEADERS_CHECK = ['Name', 'State', 'Salary', 'Grade', 'Room', 'Telnum', 'Picture'
 
 @app.route('/')
 def index():
-    return "Hello World"
+    return render_template('home.html')
 
 @app.route('/upload_csv', methods=['GET','POST'])
 def upload_csv():
@@ -220,6 +220,19 @@ def see_people():
     peoples = People.query.all()
     images = [f for f in listdir(mypath) if isfile(join(mypath, f))]
     return render_template('see_people.html',peoples=peoples, images=images)
+
+
+@app.route('/delete/<int:id>', methods=['GET'])
+def delete(id):
+    people_to_delete = People.query.get_or_404(id)
+    try:
+        db.session.delete(people_to_delete)
+        db.session.commit()
+        flash('Deleted Successfully','success')
+        return redirect(url_for('see_people'))
+    except:
+        flash('Could not delete','danger')
+        return redirect(url_for('see_people'))
 
 
 if __name__=="__main__":
