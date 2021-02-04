@@ -234,6 +234,27 @@ def delete(id):
         flash('Could not delete','danger')
         return redirect(url_for('see_people'))
 
+@app.route('/create_people',methods=['GET','POST'])
+def create_people():
+    if request.method=="POST":
+        name = request.form['name']
+        state = request.form['state']
+        salary = request.form['salary']
+        grade = request.form['grade']
+        room = request.form['room']
+        telnum = request.form['telnum']
+        picture = request.form['picture']
+        keywords = request.form['keywords']
+        people = People(name=name,state=state,salary=salary,grade=grade,room=room,telnum=telnum,picture=picture,keywords=keywords)
+        try:
+            db.session.add(people)
+            db.session.commit()
+        except:
+            flash('There was a problem in adding the record','danger')
+            return redirect(url_for('create_people'))
+        flash('Record added successfully','success')
+        return redirect(url_for('index'))
+    return render_template('create_people.html')
 
 if __name__=="__main__":
     app.run(debug=True)

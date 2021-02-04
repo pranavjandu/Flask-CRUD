@@ -15,7 +15,7 @@
 
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="{{url_for('index')}}">
+    <a class="navbar-brand mx-2" href="{{url_for('index')}}">
       Home
     </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
@@ -25,13 +25,16 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav mr-auto">
         <li>
-          <a class="nav-link" href="{{url_for('see_people')}}">See all people</a>
+          <a class="nav-link" href="{{url_for('see_people')}}">People Details</a>
         </li>
         <li class="nav-item" id="nav-home">
-          <a class="nav-link" href="{{url_for('upload_csv')}}">upload csv</a>
+          <a class="nav-link" href="{{url_for('upload_csv')}}">Upload CSV</a>
         </li>
         <li class="nav-item" id="nav-home">
-          <a class="nav-link" href="{{url_for('upload_image')}}">upload image</a>
+          <a class="nav-link" href="{{url_for('upload_image')}}">Upload Image</a>
+        </li>
+        <li class="nav-item" id="nav-home">
+          <a class="nav-link" href="{{url_for('create_people')}}">Create Record</a>
         </li>
       </ul>
     </div>
