@@ -278,6 +278,17 @@ def update(id):
             return redirect(url_for('index'))
     people_to_update = People.query.get_or_404(id)
     return render_template('update_people.html',people=people_to_update,id=id)
+
+@app.errorhandler(404)
+@app.route("/404")
+def page_not_found(error):
+    return render_template('404.html', title='404')
+
+
+@app.errorhandler(500)
+@app.route("/=500")
+def server_error(error):
+    return render_template('500.html', title='500')
     
 
 if __name__=="__main__":
