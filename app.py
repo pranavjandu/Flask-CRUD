@@ -34,7 +34,7 @@ def Load_Data(file_name):
 
 
 UPLOAD_FOLDER = 'upload'
-mypath = "upload/images"
+mypath = "static/images"
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
@@ -201,7 +201,7 @@ def upload_image():
                 flash('Same name image already exists','danger')
                 return redirect(request.url)
             try:
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], 'images/'+filename))
+                file.save(os.path.join('static', 'images/'+filename))
             except:
                 flash('Error while saving image','danger')
                 return redirect(request.url)
@@ -213,6 +213,14 @@ def upload_image():
     else:
         # In case of GET request
         return render_template('upload_image.html')
+
+
+@app.route('/see_people', methods=['GET'])
+def see_people():
+    peoples = People.query.all()
+    images = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+    return render_template('see_people.html',peoples=peoples, images=images)
+
 
 if __name__=="__main__":
     app.run(debug=True)
