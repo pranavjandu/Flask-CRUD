@@ -279,6 +279,16 @@ def update(id):
     people_to_update = People.query.get_or_404(id)
     return render_template('update_people.html',people=people_to_update,id=id)
 
+@app.route('/search_name',methods=['GET','POST'])
+def search_name():
+    if request.method=="POST":
+        names = request.form['name']
+        names = names.capitalize()
+        peoples = People.query.filter_by(name=names).all()
+        images = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+        return render_template('search_name.html',show=True, peoples=peoples,images=images)
+    return render_template('search_name.html',show=False)
+
 @app.errorhandler(404)
 @app.route("/404")
 def page_not_found(error):
@@ -286,7 +296,7 @@ def page_not_found(error):
 
 
 @app.errorhandler(500)
-@app.route("/=500")
+@app.route("/500")
 def server_error(error):
     return render_template('500.html', title='500')
     

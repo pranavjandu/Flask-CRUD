@@ -1,0 +1,69 @@
+{%extends 'base.html'%}
+{%block title%} Search {%endblock title%}
+
+{%block body%}
+
+<div class="container">
+    {% for category, message in get_flashed_messages(with_categories=True) %}
+    <div class="alert alert-{{category}}">{{ message }}</div>
+    {% endfor %}
+    <h1>Search by Name</h1>
+    <form method="POST" action="/search_name">
+        <div class="form-group row mt-2">
+            <label for="name" class="col-sm-2 col-form-label">Name</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="name" name="name" placeholder="Enter Name" required>
+            </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+    {% if show is true %}
+    {%if peoples|length > 0 %}
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">State</th>
+                <th scope="col">Salary</th>
+                <th scope="col">Grade</th>
+                <th scope="col">Room</th>
+                <th scope="col">Telnum</th>
+                <th scope="col">Picture</th>
+                <th scope="col">Keywords</th>
+                <th scope="col">Options</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for people in peoples %}
+            <tr>
+                <td scope="col">{{people.name}}</td>
+                <td scope="col">{{people.state if people.state is not none}}</td>
+                <td scope="col">{{people.salary if people.salary is not none}}</td>
+                <td scope="col">{{people.grade if people.grade is not none}}</td>
+                <td scope="col">{{people.room if people.room is not none}}</td>
+                <td scope="col">{{people.telnum if people.telnum is not none}}</td>
+                <td scope="col">
+                    {% if people.picture in images %}
+                    <img src="static/images/{{people.picture}}" width="100" height="100" alt="Not uploaded" />
+                    {%else%}
+                    {% if people.picture != ' ' %}
+                    {{people.picture}} (Not Uploaded)
+                    {%endif%}
+                    {%endif%}
+                </td>
+                <td scope="col">{{people.keywords if people.keywords is not none}}</td>
+                <td scope="col"><a href="/update/{{people.id}}" class="btn btn-warning">Update</a><br><a
+                        href="/delete/{{people.id}}" class="btn btn-danger mt-2">Delete</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {%else%}
+    <div class="text-center"><h5>No matching records found.</h5></div>
+    
+    {%endif%}
+    {%endif%}
+</div>
+
+
+{%endblock body%}
