@@ -1,0 +1,21 @@
+{%extends 'base.html'%}
+{%block title%} Upload Image {%endblock title%}
+
+{%block body%}
+
+<div class="container">
+    {% for category, message in get_flashed_messages(with_categories=True) %}
+    <div class="alert alert-{{category}}">{{ message }}</div>
+    {% endfor %}
+    <h1>File Input</h1>
+    <form method="POST" action="/upload_image" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="image">Image File Input format - ['png', 'jpg', 'jpeg', 'gif']</label>
+            <input type="file" name="image">
+        </div>
+        <button type="submit" class="btn btn-success mt-5">Upload</button>
+    </form>
+</div>
+
+
+{%endblock body%}
