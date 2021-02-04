@@ -289,6 +289,17 @@ def search_name():
         return render_template('search_name.html',show=True, peoples=peoples,images=images)
     return render_template('search_name.html',show=False)
 
+
+#Route to show details of peoples with salary less than given
+@app.route('/search_less', methods=['GET','POST'])
+def search_less():
+    if request.method=="POST":
+        salaryy = float(request.form['salary'])
+        peoples = People.query.filter(People.salary<=salaryy).all()
+        images = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+        return render_template('search_less.html',show=True, peoples=peoples,images=images)
+    return render_template('search_less.html',show=False)
+
 @app.errorhandler(404)
 @app.route("/404")
 def page_not_found(error):
