@@ -10,6 +10,7 @@ test.py
 instance/*
 !instance/.gitignore
 .webassets-cache
+secret.py
 
 ### Flask.Python Stack ###
 # Byte-compiled / optimized / DLL files

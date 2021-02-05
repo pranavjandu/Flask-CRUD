@@ -33,7 +33,7 @@
                 <td scope="col">{{people.telnum if people.telnum is not none}}</td>
                 <td scope="col">
                     {% if people.picture in images %}
-                    <img src="static/images/{{people.picture}}" width="100" height="100" alt="Not uploaded" />
+                    <img src="https://madnan17.blob.core.windows.net/images/{{people.picture}}" width="100" height="100" alt="Could not load" />
                     {%else%}
                     {% if people.picture != ' ' %}
                     {{people.picture}} (Not Uploaded)

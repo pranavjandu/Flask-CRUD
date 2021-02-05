@@ -7,6 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql.elements import Null
 from os import listdir
 from os.path import isfile, join
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, __version__
 
 from werkzeug.utils import secure_filename
 
@@ -31,8 +32,8 @@ def Load_Data(file_name):
 
            
 
-
-
+from secret import AZURE_STORAGE_CONNECTION_STRING
+AZURE_CONTAINER_NAME = "images"
 UPLOAD_FOLDER = 'upload'
 mypath = "static/images"
 app.secret_key = 'super secret key'
@@ -172,12 +173,6 @@ def upload_csv():
         # In case of GET request
         return render_template('upload_csv.html')
 
-#return redirect(url_for('uploaded_file',filename=filename))
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'],
-                               filename)
-
 
 @app.route('/upload_image', methods=['GET','POST'])
 def upload_image():
@@ -194,7 +189,12 @@ def upload_image():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             try:
-                onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+                blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
+                container_client = blob_service_client.get_container_client(AZURE_CONTAINER_NAME)
+                blob_list = container_client.list_blobs()
+                onlyfiles = []
+                for blob in blob_list:
+                    onlyfiles.append(blob.name)
                 if filename in onlyfiles:
                     raise Exception
             except:
@@ -202,9 +202,16 @@ def upload_image():
                 return redirect(request.url)
             try:
                 file.save(os.path.join('static', 'images/'+filename))
+                blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER_NAME, blob=filename)
+                with open("static/images/"+filename, "rb") as data:
+                    blob_client.upload_blob(data)
             except:
                 flash('Error while saving image','danger')
                 return redirect(request.url)
+            try:
+                os.remove("static/images/"+filename)
+            except:
+                pass
             flash('Image successfully uploaded','success')
             return redirect(request.url)
         else:
@@ -218,7 +225,16 @@ def upload_image():
 @app.route('/see_people', methods=['GET'])
 def see_people():
     peoples = People.query.all()
-    images = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+    try:
+        blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
+        container_client = blob_service_client.get_container_client(AZURE_CONTAINER_NAME)
+        blob_list = container_client.list_blobs()
+        images = []
+        for blob in blob_list:
+            images.append(blob.name)
+    except:
+        flash('Error occured.','danger')
+        return redirect(request.url)
     return render_template('see_people.html',peoples=peoples, images=images)
 
 
@@ -285,7 +301,16 @@ def search_name():
         names = request.form['name']
         names = names.capitalize()
         peoples = People.query.filter_by(name=names).all()
-        images = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+        try:
+            blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
+            container_client = blob_service_client.get_container_client(AZURE_CONTAINER_NAME)
+            blob_list = container_client.list_blobs()
+            images = []
+            for blob in blob_list:
+                images.append(blob.name)
+        except:
+            flash('Error occured.','danger')
+            return redirect(request.url)
         return render_template('search_name.html',show=True, peoples=peoples,images=images)
     return render_template('search_name.html',show=False)
 
@@ -296,7 +321,16 @@ def search_less():
     if request.method=="POST":
         salaryy = float(request.form['salary'])
         peoples = People.query.filter(People.salary<=salaryy).all()
-        images = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+        try:
+            blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
+            container_client = blob_service_client.get_container_client(AZURE_CONTAINER_NAME)
+            blob_list = container_client.list_blobs()
+            images = []
+            for blob in blob_list:
+                images.append(blob.name)
+        except:
+            flash('Error occured.','danger')
+            return redirect(request.url)
         return render_template('search_less.html',show=True, peoples=peoples,images=images)
     return render_template('search_less.html',show=False)
 
