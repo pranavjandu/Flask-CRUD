@@ -334,6 +334,37 @@ def search_less():
         return render_template('search_less.html',show=True, peoples=peoples,images=images)
     return render_template('search_less.html',show=False)
 
+@app.route('/delete_image',methods=['GET'])
+def delete_image():
+    try:
+        blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
+        container_client = blob_service_client.get_container_client(AZURE_CONTAINER_NAME)
+        blob_list = container_client.list_blobs()
+        images = []
+        for blob in blob_list:
+            images.append(blob.name)
+    except:
+        flash('Error occured.','danger')
+        return redirect(request.url)
+    return render_template('delete_image.html',images=images)
+
+@app.route('/image_delete',methods=['GET'])
+def image_delete():
+    imagename = request.args.get('imagename')
+    if imagename is None:
+        return redirect(url_for('delete_image'))
+    try:
+        blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
+        blob_client = blob_service_client.get_blob_client(container="images", blob=imagename)
+        blob_client.delete_blob()
+    except:
+        flash('Error occured.','danger')
+        return redirect(url_for('delete_image'))
+    flash('Image deleted','success')
+    return redirect(url_for('delete_image'))
+    
+
+
 @app.errorhandler(404)
 @app.route("/404")
 def page_not_found(error):

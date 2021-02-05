@@ -1,0 +1,33 @@
+{%extends 'base.html'%}
+{%block title%} Delete image {%endblock title%}
+
+{%block body%}
+
+<div class="container">
+    {% for category, message in get_flashed_messages(with_categories=True) %}
+    <div class="alert alert-{{category}}">{{ message }}</div>
+    {% endfor %}
+    <h1>Delete by image name</h1>
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Image Name</th>
+                <th scope="col">Image</th>
+                <th scope="col">Options</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for image in images %}
+            <tr>
+                <td scope="col">{{image}}</td>
+                <td scope="col"><img src="https://madnan17.blob.core.windows.net/images/{{image}}" width="100" height="100" alt="Could not load" /></td>
+                <td scope="col"><a
+                        href="/image_delete?imagename={{image}}" class="btn btn-danger mt-2">Delete</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+{%endblock body%}
