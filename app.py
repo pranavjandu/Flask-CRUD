@@ -8,6 +8,7 @@ from sqlalchemy.sql.elements import Null
 from os import listdir
 from os.path import isfile, join
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, __version__
+import psycopg2
 
 from werkzeug.utils import secure_filename
 
@@ -22,7 +23,8 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def Load_Data(file_name):
-    data = pd.read_csv("people2.csv")
+    data = pd.read_csv(file_name)
+    print(list(data.columns))
     if list(data.columns) == HEADERS_CHECK:
         data.fillna("", inplace = True) 
         listdict = data.to_dict('records')
@@ -30,15 +32,15 @@ def Load_Data(file_name):
     else:
         raise Exception
 
-           
+SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-from secret import AZURE_STORAGE_CONNECTION_STRING
+from secret import AZURE_STORAGE_CONNECTION_STRING, POSTGRES_URI
 AZURE_CONTAINER_NAME = "images"
 UPLOAD_FOLDER = 'upload'
 mypath = "static/images"
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = POSTGRES_URI
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024    #16Mb Limit
 
@@ -89,6 +91,7 @@ def upload_csv():
                 
             except:
                 db.session.rollback()
+                db.session.close()
                 flash('A fatal error occured.','danger')
                 return redirect(request.url)
             try:
@@ -156,9 +159,12 @@ def upload_csv():
                 db.session.commit() #Attempt to commit all the records
             except Exception as e:
                 db.session.rollback() #Rollback the changes on error
+                db.session.close()
                 flash('Error while adding data to database','danger')
                 return redirect(request.url)
-
+            finally:
+                
+                db.session.close()
             flash('Successfully add data to database','success')
             try:
                 os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
@@ -249,6 +255,8 @@ def delete(id):
     except:
         flash('Could not delete','danger')
         return redirect(url_for('see_people'))
+    finally:
+        db.session.close()
 
 @app.route('/create_people',methods=['GET','POST'])
 def create_people():
@@ -261,6 +269,48 @@ def create_people():
         telnum = request.form['telnum']
         picture = request.form['picture']
         keywords = request.form['keywords']
+        if salary == '':
+            salary = None
+        else:
+            try:
+                salary = float(salary)
+            except:
+                salary = None
+        if grade == '':
+            grade = None
+        else:
+            try:
+                grade = int(grade)
+            except:
+                grade = None
+        if room == '':
+            room = None
+        else:
+            try:
+                room = int(room)
+            except:
+                room = None
+        if telnum == '':
+            telnum = None
+        else:
+            try:
+                telnum = str(telnum)
+            except:
+                telnum = None
+        if picture == '':
+            picture = ""
+        else:
+            try:
+                picture = str(picture)
+            except:
+                picture = ""
+        if keywords == '':
+            keywords = None
+        else:
+            try:
+                keywords = str(keywords)
+            except:
+                keywords = None
         people = People(name=name,state=state,salary=salary,grade=grade,room=room,telnum=telnum,picture=picture,keywords=keywords)
         try:
             db.session.add(people)
@@ -268,6 +318,8 @@ def create_people():
         except:
             flash('There was a problem in adding the record','danger')
             return redirect(url_for('create_people'))
+        finally:
+            db.session.close()
         flash('Record added successfully','success')
         return redirect(url_for('index'))
     return render_template('create_people.html')
@@ -277,14 +329,64 @@ def update(id):
     if request.method=="POST":
         id = request.form['id']
         people = People.query.get_or_404(id)
-        people.name = request.form['name']
-        people.state = request.form['state']
-        people.salary = request.form['salary']
-        people.grade = request.form['grade']
-        people.room = request.form['room']
-        people.telnum = request.form['telnum']
-        people.picture = request.form['picture']
-        people.keywords = request.form['keywords']
+        name = request.form['name']
+        state = request.form['state']
+        salary = request.form['salary']
+        grade = request.form['grade']
+        room = request.form['room']
+        telnum = request.form['telnum']
+        picture = request.form['picture']
+        keywords = request.form['keywords']
+        if salary == '':
+            salary = None
+        else:
+            try:
+                salary = float(salary)
+            except:
+                salary = None
+        if grade == '':
+            grade = None
+        else:
+            try:
+                grade = int(grade)
+            except:
+                grade = None
+        if room == '':
+            room = None
+        else:
+            try:
+                room = int(room)
+            except:
+                room = None
+        if telnum == '':
+            telnum = None
+        else:
+            try:
+                telnum = str(telnum)
+            except:
+                telnum = None
+        if picture == '':
+            picture = None
+        else:
+            try:
+                picture = str(picture)
+            except:
+                picture = ""
+        if keywords == '':
+            keywords = None
+        else:
+            try:
+                keywords = str(keywords)
+            except:
+                keywords = None
+        people.name = name
+        people.state = state
+        people.salary = salary
+        people.grade = grade
+        people.room = room
+        people.telnum = telnum
+        people.picture = picture
+        people.keywords = keywords
         try:
             db.session.commit()
             flash('Successfully updated the record','success')
